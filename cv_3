@@ -1,0 +1,49 @@
+!pip install opencv-python
+
+import cv2
+
+def detect_moving_objects(video_path):
+    cap = cv2.VideoCapture(video_path)
+
+    if not cap.isOpened():
+        print("Error: Couldn't open the video file.")
+        return
+
+    bg_subtractor = cv2.createBackgroundSubtractorMOG2()
+
+    while True:
+        ret, frame = cap.read()
+
+        if not ret:
+            break
+
+        fg_mask = bg_subtractor.apply(frame)
+        fg_mask = cv2.medianBlur(fg_mask, 5)
+
+        contours, _ = cv2.findContours(
+            fg_mask,
+            cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE
+        )
+
+        for contour in contours:
+            if cv2.contourArea(contour) > 100:
+
+                M = cv2.moments(contour)
+
+                if M["m00"] != 0:
+                    cx = int(M["m10"] / M["m00"])
+                    cy = int(M["m01"] / M["m00"])
+
+                    cv2.circle(frame, (cx, cy), 5, (255, 0, 0), -1)
+
+        cv2.imshow("Moving Object Detection", frame)
+
+        if cv2.waitKey(30) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+
+detect_moving_objects("input.mp4")
