@@ -1,0 +1,37 @@
+import cv2
+import matplotlib.pyplot as plt
+
+
+%matplotlib inline
+
+
+image_path = 'family.jpg' 
+image = cv2.imread(image_path)
+
+if image is None:
+    print(f"Error: Could not load image from '{image_path}'. Please check the filename.")
+else:
+
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+
+    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+    
+
+    faces = face_cascade.detectMultiScale(
+        gray, 
+        scaleFactor=1.1, 
+        minNeighbors=5, 
+        minSize=(30, 30)
+    )
+
+    for (x, y, w, h) in faces:
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)
+        
+   
+    plt.figure(figsize=(10, 8))
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    plt.imshow(image_rgb)
+    plt.title(f'Detected {len(faces)} Face(s)')
+    plt.axis('off')
+    plt.show()
